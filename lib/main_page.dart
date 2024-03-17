@@ -6,8 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:foodmap2/searchpage/search_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'mypage/my_page.dart';
 //import 'package:foodmap/mypage/my_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -18,13 +21,12 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
-
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
-    HomeScreen(),
-    //ProfileScreen(),
+    SearchScreen(),
+    FavoritesScreen(),
+    RandomScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -84,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late NaverMapController _mapController;
   NLocationOverlay? _locationOverlay;
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -93,11 +94,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildCategoryImage(0, 'assets/images/korea.png', 'kor'),
-            _buildCategoryImage(1, 'assets/images/western.png', 'wes'),
-            _buildCategoryImage(2, 'assets/images/japen.png', 'ja'),
-            _buildCategoryImage(3, 'assets/images/china.png', 'ch'),
-            _buildCategoryImage(4, 'assets/images/snack.png', 'sn'),
+            _buildCategoryImage(0, 'assets/images/korea.png', '한식'),
+            _buildCategoryImage(1, 'assets/images/western.png', '양식'),
+            _buildCategoryImage(2, 'assets/images/japen.png', '일식'),
+            _buildCategoryImage(3, 'assets/images/china.png', '중식'),
+            _buildCategoryImage(4, 'assets/images/snack.png', '분식'),
           ],
         ),
         SizedBox(height: 16),
@@ -190,5 +191,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+}
+
+class SearchScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SearchPage();
+  }
+}
+
+class FavoritesScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Favorites Screen'));
+  }
+}
+
+class RandomScreen extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Random_game Screen'));
+  }
+}
+
+class ProfileScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MyPage();
   }
 }
