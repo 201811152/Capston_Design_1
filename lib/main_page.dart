@@ -85,21 +85,25 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Matrix4> transforms = List.generate(5, (_) => Matrix4.identity());
   late NaverMapController _mapController;
   NLocationOverlay? _locationOverlay;
+  int _selectedCategoryIndex = -1;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildCategoryImage(0, 'assets/images/korea.png', '한식'),
-            _buildCategoryImage(1, 'assets/images/western.png', '양식'),
-            _buildCategoryImage(2, 'assets/images/japen.png', '일식'),
-            _buildCategoryImage(3, 'assets/images/china.png', '중식'),
-            _buildCategoryImage(4, 'assets/images/snack.png', '분식'),
-          ],
+        SizedBox(
+          height: 100, // Adjust the height as needed
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _buildCategoryItem(0, 'assets/images/korea.png', '한식'),
+              _buildCategoryItem(1, 'assets/images/western.png', '양식'),
+              _buildCategoryItem(2, 'assets/images/japen.png', '일식'),
+              _buildCategoryItem(3, 'assets/images/china.png', '중식'),
+              _buildCategoryItem(4, 'assets/images/snack.png', '분식'),
+            ],
+          ),
         ),
         SizedBox(height: 16),
         SizedBox(
@@ -118,6 +122,79 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildCategoryItem(int index, String imagePath, String text) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCategoryIndex = index;
+          // Apply the flinch effect to the selected category item
+          transforms[index] = Matrix4.identity()..scale(0.9);
+          // Reset the flinch effect after a short duration
+          Future.delayed(Duration(milliseconds: 200), () {
+            setState(() {
+              transforms[index] = Matrix4.identity();
+            });
+          });
+        });
+        _onCategoryItemTapped(index);
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: 80, // Adjust the width as needed
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.all(_selectedCategoryIndex == index ? 4 : 0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: _selectedCategoryIndex == index ? Colors.brown : Colors.transparent,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        transform: transforms[index],
+        child: Column(
+          children: [
+            Image.asset(
+              imagePath,
+              width: 60, // Adjust the image size as needed
+              height: 60,
+            ),
+            SizedBox(height: 8),
+            Text(
+              text,
+              style: TextStyle(fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onCategoryItemTapped(int index) {
+    switch (index) {
+      case 0:
+      // Handle tap on "한식" category
+        print('한식 category tapped');
+        break;
+      case 1:
+      // Handle tap on "양식" category
+        print('양식 category tapped');
+        break;
+      case 2:
+      // Handle tap on "일식" category
+        print('일식 category tapped');
+        break;
+      case 3:
+      // Handle tap on "중식" category
+        print('중식 category tapped');
+        break;
+      case 4:
+      // Handle tap on "분식" category
+        print('분식 category tapped');
+        break;
+    }
   }
 
   Future<void> _requestLocationPermission() async {
@@ -149,49 +226,6 @@ class _HomeScreenState extends State<HomeScreen> {
       //_mapController.moveCamera(CameraUpdate.scrollTo(location));
     });
   }
-
-  Widget _buildCategoryImage(int index, String imagePath, String label) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          transforms[index] = Matrix4.identity()..scale(0.9);
-        });
-        Future.delayed(Duration(milliseconds: 100), () {
-          setState(() {
-            transforms[index] = Matrix4.identity();
-          });
-        });
-      },
-      child: Column(
-        children: [
-          AnimatedContainer(
-            duration: Duration(milliseconds: 100),
-            curve: Curves.easeInOut,
-            transform: transforms[index],
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 30,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: AssetImage(imagePath),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class SearchScreen extends StatelessWidget {
@@ -204,14 +238,14 @@ class SearchScreen extends StatelessWidget {
 class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Favorites Screen'));
+    return Center(child: Text('찜 목록'));
   }
 }
 
 class RandomScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Random_game Screen'));
+    return Center(child: Text('랜덤 게임'));
   }
 }
 

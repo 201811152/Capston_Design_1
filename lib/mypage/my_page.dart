@@ -9,6 +9,7 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> {
   String _nickname = '';
+  String _profileImageUrl = '';
 
   @override
   void initState() {
@@ -21,11 +22,13 @@ class _MyPageState extends State<MyPage> {
       User user = await UserApi.instance.me();
       setState(() {
         _nickname = user.kakaoAccount?.profile?.nickname ?? '';
+        _profileImageUrl = user.kakaoAccount?.profile?.profileImageUrl ?? '';
       });
     } catch (e) {
       print('Failed to get user info: $e');
     }
   }
+
 
   Future<void> _logout() async {
     try {
@@ -54,28 +57,59 @@ class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _nickname,
-              style: TextStyle(fontSize: 24),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          SizedBox(height: 60),
+          if (_profileImageUrl.isNotEmpty)
+            CircleAvatar(
+              backgroundImage: NetworkImage(_profileImageUrl),
+              radius: 60,
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _logout,
-              child: Text('Logout'),
+          SizedBox(height: 20),
+          Text(
+            _nickname,
+            style: TextStyle(fontSize: 24, color: Colors.black),
+          ),
+          SizedBox(height: 20),
+          Spacer(),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _logout,
+                    child: Text('로그아웃'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown.shade50,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _unlinkKakaoAccount,
+                    child: Text('회원 탈퇴'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown.shade50,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _unlinkKakaoAccount,
-        child: Icon(Icons.exit_to_app),
-        backgroundColor: Colors.red,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
