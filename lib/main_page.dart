@@ -1,17 +1,11 @@
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:foodmap2/searchpage/search_page.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import 'mypage/my_page.dart';
-//import 'package:foodmap/mypage/my_page.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -86,6 +80,19 @@ class _HomeScreenState extends State<HomeScreen> {
   late NaverMapController _mapController;
   NLocationOverlay? _locationOverlay;
   int _selectedCategoryIndex = -1;
+  StreamSubscription<Position>? _positionStreamSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestLocationPermission();
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +104,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              _buildCategoryItem(0, 'assets/images/korea.png', '한식'),
+              _buildCategoryItem(0, 'assets/images/한식.png', '한식'),
               _buildCategoryItem(1, 'assets/images/western.png', '양식'),
               _buildCategoryItem(2, 'assets/images/japen.png', '일식'),
               _buildCategoryItem(3, 'assets/images/china.png', '중식'),
-              _buildCategoryItem(4, 'assets/images/snack.png', '분식'),
+              _buildCategoryItem(4, 'assets/images/분식.png', '분식'),
             ],
           ),
         ),
@@ -110,6 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 450,
           child: NaverMap(
             onMapReady: _onMapCreated,
+            options: NaverMapViewOptions(
+              //initialCameraPosition:
+            ),
           ),
         ),
         SizedBox(height: 16),
@@ -206,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
     }
-    // Location permission granted, show current location
+    // Location permission granted, get current location
     _showCurrentLocation();
   }
 
@@ -219,11 +229,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _locationOverlay = await _mapController.getLocationOverlay();
     _locationOverlay?.setIsVisible(true);
 
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition();
+    NLatLng location = NLatLng(position.latitude, position.longitude);
+
+    // Set the camera position to the current location
+    _mapController.updateCamera(
+      NCameraUpdate.scrollAndZoomTo(target: location),
+    );
+
     // Continuously update the location overlay
-    StreamSubscription<Position> positionStream = Geolocator.getPositionStream().listen((Position position) {
+    _positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
       NLatLng location = NLatLng(position.latitude, position.longitude);
       _locationOverlay?.setPosition(location);
-      //_mapController.moveCamera(CameraUpdate.scrollTo(location));
     });
   }
 }
