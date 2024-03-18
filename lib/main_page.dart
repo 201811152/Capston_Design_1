@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -116,12 +117,27 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           height: 450,
           child: NaverMap(
-            onMapReady: _onMapCreated,
-            options: NaverMapViewOptions(
-              //initialCameraPosition:
+            options: const NaverMapViewOptions(),
+            onMapReady: (NaverMapController controller) {
+              _mapController = controller;
+              _requestLocationPermission();
+              final marker = NMarker(
+                  id: '임마누엘',
+                  position:
+                  const NLatLng(36.62335330867863, 127.48509153920222 )
+              );
+              final marker1 = NMarker(
+                  id: 'Mix',
+                  position:
+                  const NLatLng(36.6221962699699, 127.48209103214674 )
+              );
+              _mapController.addOverlayAll({marker,marker1});
+              final onMarkerInfoWindow =
+              NInfoWindow.onMarker(id: marker.info.id, text: "임마누엘");
+              marker.openInfoWindow(onMarkerInfoWindow);
+              },
             ),
           ),
-        ),
         SizedBox(height: 16),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
@@ -220,10 +236,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _showCurrentLocation();
   }
 
+  /*
   void _onMapCreated(NaverMapController controller) {
     _mapController = controller;
     _requestLocationPermission();
   }
+*/
 
   void _showCurrentLocation() async {
     _locationOverlay = await _mapController.getLocationOverlay();
