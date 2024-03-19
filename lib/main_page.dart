@@ -98,6 +98,7 @@ class _MainPageState extends State<MainPage> {
                     currentAccountPicture: CircleAvatar(
                       backgroundImage: NetworkImage(_profileImageUrl),
                     ),
+
                     accountName: Text(_nickname),
                     accountEmail: Text(snapshot.data?.kakaoAccount?.email ?? ''),
                   );
@@ -115,10 +116,37 @@ class _MainPageState extends State<MainPage> {
             ListTile(
               title: Text('로그아웃'),
               onTap: _logout,
+              trailing: Icon(Icons.logout),
             ),
             ListTile(
               title: Text('회원 탈퇴'),
-              onTap: _unlinkKakaoAccount,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('회원 탈퇴'),
+                      content: Text('정말로 탈퇴하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          child: Text('확인'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _unlinkKakaoAccount();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('취소'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              trailing: Icon(Icons.cancel),
             ),
           ],
         ),
@@ -131,12 +159,11 @@ class _MainPageState extends State<MainPage> {
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: AppBar(
         centerTitle: true,
-        title: const Center(
-          child: Text(
+        title: const Text(
             '맛집일지도',
             style: TextStyle(color: Colors.white),
           ),
-        ),
+
         backgroundColor: const Color(0xFFa1887F),
         actions: [
           Builder(
