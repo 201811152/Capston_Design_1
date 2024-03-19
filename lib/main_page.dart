@@ -19,18 +19,19 @@ class _MainPageState extends State<MainPage> {
   String _nickname = '';
   String _profileImageUrl = '';
 
-  @override
-  void initState() {
-    super.initState();
-    _getUserInfo();
-  }
-
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
     FavoritesScreen(),
     RandomScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
+  }
+
 
   Future<void> _getUserInfo() async {
     try {

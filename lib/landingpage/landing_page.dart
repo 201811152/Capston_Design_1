@@ -9,6 +9,23 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAccessTokenAndNavigate();
+  }
+
+  Future<void> _checkAccessTokenAndNavigate() async {
+    try {
+      AccessTokenInfo tokenInfo = await UserApi.instance.accessTokenInfo();
+      if (tokenInfo.expiresIn != null && !tokenInfo.expiresIn!.isNegative) {
+        // Access token is valid, navigate to MainPage
+        _navigateToMainPage();
+      }
+    } catch (e) {
+      // No valid access token found, stay on LandingPage
+    }
+  }
 
   Future<void> _loginWithKakao() async {
     try {
