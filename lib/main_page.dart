@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:foodmap2/searchpage/search_page.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'landingpage/landing_page.dart';
 import 'mypage/my_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -14,21 +16,63 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+  String _nickname = '';
+  String _profileImageUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
+  }
 
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     SearchScreen(),
     FavoritesScreen(),
     RandomScreen(),
-    ProfileScreen(),
   ];
+
+  Future<void> _getUserInfo() async {
+    try {
+      User user = await UserApi.instance.me();
+      setState(() {
+        _nickname = user.kakaoAccount?.profile?.nickname ?? '';
+        _profileImageUrl = user.kakaoAccount?.profile?.profileImageUrl ?? '';
+      });
+    } catch (e) {
+      print('Failed to get user info: $e');
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await UserApi.instance.logout();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LandingPage()),
+      );
+    } catch (e) {
+      print('Failed to logout: $e');
+    }
+  }
+
+  Future<void> _unlinkKakaoAccount() async {
+    try {
+      await UserApi.instance.unlink();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LandingPage()),
+      );
+    } catch (e) {
+      print('Failed to unlink Kakao account: $e');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -39,23 +83,28 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       endDrawer: Drawer(
-          width: 220,
+        width: 220,
         child: ListView(
+          padding: const EdgeInsets.symmetric(vertical:0),
           children: [
-            // Add your drawer menu items here
-            ListTile(
-              title: Text('Item 1'),
-              onTap: () {
-                // Handle item 1 tap
-              },
+            UserAccountsDrawerHeader(
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: NetworkImage(_profileImageUrl),
+              ),
+              decoration: BoxDecoration(
+                color: Colors.brown.shade200
+              ),
+              accountName: Text(_nickname+'님 환영합니다'),
+              accountEmail: Text(''),
             ),
             ListTile(
-              title: Text('Item 2'),
-              onTap: () {
-                // Handle item 2 tap
-              },
+              title: Text('로그아웃'),
+              onTap: _logout,
             ),
-            // ...
+            ListTile(
+              title: Text('회원 탈퇴'),
+              onTap: _unlinkKakaoAccount,
+            ),
           ],
         ),
       ),
@@ -108,10 +157,6 @@ class _MainPageState extends State<MainPage> {
         BottomNavigationBarItem(
           icon: Icon(Icons.all_inclusive),
           label: '랜덤 게임',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: '마이페이지',
         ),
       ],
       currentIndex: _selectedIndex,
@@ -318,12 +363,5 @@ class RandomScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Center(child: Text('랜덤 게임'));
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MyPage();
   }
 }
