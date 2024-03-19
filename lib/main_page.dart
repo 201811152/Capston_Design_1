@@ -94,7 +94,7 @@ class _MainPageState extends State<MainPage> {
                 if (snapshot.hasData) {
                   return UserAccountsDrawerHeader(
                     decoration: BoxDecoration(
-                      color: Colors.brown.shade200
+                        color: Colors.brown.shade200
                     ),
                     currentAccountPicture: CircleAvatar(
                       backgroundImage: NetworkImage(_profileImageUrl),
@@ -149,6 +149,13 @@ class _MainPageState extends State<MainPage> {
               },
               trailing: Icon(Icons.cancel),
             ),
+            SizedBox(height: 400),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop(); // 이 줄이 drawer 창을 닫습니다.
+              },
+              trailing: Icon(Icons.arrow_back),
+            ),
           ],
         ),
       ),
@@ -199,8 +206,8 @@ class _MainPageState extends State<MainPage> {
           label: '찜',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.all_inclusive),
-          label: '랜덤 게임',
+          icon: Icon(Icons.wb_sunny),
+          label: '추천 메뉴',
         ),
       ],
       currentIndex: _selectedIndex,
@@ -406,6 +413,6 @@ class FavoritesScreen extends StatelessWidget {
 class RandomScreen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('랜덤 게임'));
+    return Center(child: Text('날씨 별 추천 메뉴'));
   }
 }
