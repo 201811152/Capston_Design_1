@@ -87,15 +87,30 @@ class _MainPageState extends State<MainPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical:0),
           children: [
-            UserAccountsDrawerHeader(
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(_profileImageUrl),
-              ),
-              decoration: BoxDecoration(
-                color: Colors.brown.shade200
-              ),
-              accountName: Text(_nickname+'님 환영합니다'),
-              accountEmail: Text(''),
+            FutureBuilder<User>(
+              future: UserApi.instance.me(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return UserAccountsDrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Colors.brown.shade200
+                    ),
+                    currentAccountPicture: CircleAvatar(
+                      backgroundImage: NetworkImage(_profileImageUrl),
+                    ),
+                    accountName: Text(_nickname),
+                    accountEmail: Text(snapshot.data?.kakaoAccount?.email ?? ''),
+                  );
+                } else {
+                  return UserAccountsDrawerHeader(
+                    currentAccountPicture: CircleAvatar(
+                      backgroundImage: NetworkImage(_profileImageUrl),
+                    ),
+                    accountName: Text(_nickname),
+                    accountEmail: Text(''),
+                  );
+                }
+              },
             ),
             ListTile(
               title: Text('로그아웃'),
@@ -115,6 +130,7 @@ class _MainPageState extends State<MainPage> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: AppBar(
+        centerTitle: true,
         title: const Center(
           child: Text(
             '맛집일지도',
