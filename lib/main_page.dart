@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -30,43 +29,95 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Center(
-            child: Text('맛집일지도', style: TextStyle(color: Colors.white))),
-        backgroundColor: Color(0xFFa1887F),
+      appBar: _buildAppBar(),
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
+      bottomNavigationBar: _buildBottomNavigationBar(),
+      endDrawer: Drawer(
+          width: 220,
+        child: ListView(
+          children: [
+            // Add your drawer menu items here
+            ListTile(
+              title: Text('Item 1'),
+              onTap: () {
+                // Handle item 1 tap
+              },
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () {
+                // Handle item 2 tap
+              },
+            ),
+            // ...
+          ],
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: AppBar(
+        title: const Center(
+          child: Text(
+            '맛집일지도',
+            style: TextStyle(color: Colors.white),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '검색',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: '찜',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.all_inclusive),
-            label: '랜덤 게임',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
+        ),
+        backgroundColor: const Color(0xFFa1887F),
+        actions: [
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  // Open the drawer menu when the icon is clicked
+                  Scaffold.of(context).openEndDrawer();
+                },
+              );
+            },
           ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFFa1887F),
-        unselectedItemColor: Colors.grey[600],
-        onTap: _onItemTapped,
       ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: '홈',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: '검색',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.favorite),
+          label: '찜',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.all_inclusive),
+          label: '랜덤 게임',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: '마이페이지',
+        ),
+      ],
+      currentIndex: _selectedIndex,
+      selectedItemColor: const Color(0xFFa1887F),
+      unselectedItemColor: Colors.grey[600],
+      onTap: _onItemTapped,
     );
   }
 }
@@ -118,24 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 450,
           child: NaverMap(
             options: const NaverMapViewOptions(),
-            onMapReady: (NaverMapController controller) {
-              _mapController = controller;
-              _requestLocationPermission();
-              final marker = NMarker(
-                  id: '임마누엘',
-                  position:
-                  const NLatLng(36.62335330867863, 127.48509153920222 )
-              );
-              final marker1 = NMarker(
-                  id: 'Mix',
-                  position:
-                  const NLatLng(36.6221962699699, 127.48209103214674 )
-              );
-              _mapController.addOverlayAll({marker,marker1});
-              final onMarkerInfoWindow =
-              NInfoWindow.onMarker(id: marker.info.id, text: "임마누엘");
-              marker.openInfoWindow(onMarkerInfoWindow);
-              },
+            onMapReady: _onMapCreated,
             ),
           ),
         SizedBox(height: 16),
@@ -149,6 +183,47 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
+
+  Future<void> _requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        // Handle location permission denied
+        return;
+      }
+    }
+    // Location permission granted, get current location
+    _showCurrentLocation();
+  }
+
+
+  void _onMapCreated(NaverMapController controller) {
+    _mapController = controller;
+    _requestLocationPermission();
+  }
+
+
+  void _showCurrentLocation() async {
+    _locationOverlay = await _mapController.getLocationOverlay();
+    _locationOverlay?.setIsVisible(true);
+
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition();
+    NLatLng location = NLatLng(position.latitude, position.longitude);
+
+    // Set the camera position to the current location
+    _mapController.updateCamera(
+      NCameraUpdate.scrollAndZoomTo(target: location),
+    );
+
+    // Continuously update the location overlay
+    _positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
+      NLatLng location = NLatLng(position.latitude, position.longitude);
+      _locationOverlay?.setPosition(location);
+    });
+  }
+
 
   Widget _buildCategoryItem(int index, String imagePath, String text) {
     return GestureDetector(
@@ -223,45 +298,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _requestLocationPermission() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-        // Handle location permission denied
-        return;
-      }
-    }
-    // Location permission granted, get current location
-    _showCurrentLocation();
-  }
-
-  /*
-  void _onMapCreated(NaverMapController controller) {
-    _mapController = controller;
-    _requestLocationPermission();
-  }
-*/
-
-  void _showCurrentLocation() async {
-    _locationOverlay = await _mapController.getLocationOverlay();
-    _locationOverlay?.setIsVisible(true);
-
-    // Get the current position
-    Position position = await Geolocator.getCurrentPosition();
-    NLatLng location = NLatLng(position.latitude, position.longitude);
-
-    // Set the camera position to the current location
-    _mapController.updateCamera(
-      NCameraUpdate.scrollAndZoomTo(target: location),
-    );
-
-    // Continuously update the location overlay
-    _positionStreamSubscription = Geolocator.getPositionStream().listen((Position position) {
-      NLatLng location = NLatLng(position.latitude, position.longitude);
-      _locationOverlay?.setPosition(location);
-    });
-  }
 }
 
 class SearchScreen extends StatelessWidget {

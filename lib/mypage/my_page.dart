@@ -54,6 +54,7 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,15 +62,28 @@ class _MyPageState extends State<MyPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(height: 60),
-          if (_profileImageUrl.isNotEmpty)
-            CircleAvatar(
-              backgroundImage: NetworkImage(_profileImageUrl),
-              radius: 60,
+          Padding(
+            padding: EdgeInsets.only(left: 60.0), // Added padding to move content to the right
+            child: Row(
+              children: [
+                if (_profileImageUrl.isNotEmpty)
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(_profileImageUrl),
+                    radius: 40,
+                  ),
+                SizedBox(width: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _nickname + '님',
+                      style: TextStyle(fontSize: 20, color: Colors.black),
+                    ),
+                    Text("오늘도 맛있는 식사하세요!"),
+                  ],
+                ),
+              ],
             ),
-          SizedBox(height: 20),
-          Text(
-            _nickname,
-            style: TextStyle(fontSize: 24, color: Colors.black),
           ),
           SizedBox(height: 20),
           Spacer(),
@@ -86,7 +100,7 @@ class _MyPageState extends State<MyPage> {
                       backgroundColor: Colors.brown.shade50,
                       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                   ),
@@ -100,7 +114,7 @@ class _MyPageState extends State<MyPage> {
                       backgroundColor: Colors.brown.shade50,
                       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                   ),
